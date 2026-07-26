@@ -203,6 +203,10 @@ typedef enum {
   SP_PROFILE_SWAP = 0xD2,
   SP_PROFILE_NEXT = 0xD3,
   SP_BOOT = 0xD4,
+  // Reserved for future Combo enable/disable (MVP: no-op)
+  SP_COMBO_ON = 0xD5,
+  SP_COMBO_OFF = 0xD6,
+  SP_COMBO_TOGGLE = 0xD7,
 
   XXXXXXX = KC_NO,
   _______ = KC_TRANSPARENT,

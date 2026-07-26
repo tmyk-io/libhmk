@@ -19,7 +19,7 @@
 // Firmware Version
 //--------------------------------------------------------------------+
 
-#define FIRMWARE_VERSION 0x0108
+#define FIRMWARE_VERSION 0x0109
 
 //--------------------------------------------------------------------+
 // Common Headers
@@ -88,6 +88,25 @@ _Static_assert(1 <= NUM_KEYS && NUM_KEYS <= 256,
 
 _Static_assert(1 <= NUM_ADVANCED_KEYS && NUM_ADVANCED_KEYS <= 64,
                "NUM_ADVANCED_KEYS must be between 1 and 64");
+
+#if !defined(NUM_COMBOS)
+#error "NUM_COMBOS is not defined"
+#endif
+
+_Static_assert(1 <= NUM_COMBOS && NUM_COMBOS <= 32,
+               "NUM_COMBOS must be between 1 and 32");
+
+#if !defined(COMBO_MAX_KEYS)
+#define COMBO_MAX_KEYS 4
+#endif
+
+_Static_assert(COMBO_MAX_KEYS == 4, "COMBO_MAX_KEYS must be 4");
+
+#define COMBO_KEY_NONE 0xFF
+#define DEFAULT_COMBO_TERM_MS 50
+#define MIN_COMBO_TERM_MS 10
+#define MAX_COMBO_TERM_MS 1000
+#define COMBO_FLAG_MUST_HOLD (1u << 0)
 
 #if !defined(NUM_DYNAMIC_KEYSTROKE_MAX_BINDINGS)
 #error "NUM_DYNAMIC_KEYSTROKE_MAX_BINDINGS is not defined"
@@ -226,6 +245,19 @@ typedef struct __attribute__((packed)) {
   // The first macro node in the linked list
   macro_node_id_t head;
 } macro_t;
+
+// Combo configuration. Unused key slots must be COMBO_KEY_NONE. Keys are packed
+// to the front. An empty slot has keys[0] == COMBO_KEY_NONE.
+typedef struct __attribute__((packed)) {
+  uint8_t layer;
+  uint8_t keycode;
+  uint16_t term_ms;
+  uint8_t keys[COMBO_MAX_KEYS];
+  // bit0 = COMBO_FLAG_MUST_HOLD (reserved; MVP must keep 0)
+  uint8_t flags;
+} combo_t;
+
+_Static_assert(sizeof(combo_t) == 9, "Invalid combo_t size");
 
 // Advanced key configuration
 typedef struct __attribute__((packed)) {
