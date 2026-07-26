@@ -64,3 +64,13 @@ void layout_register(uint8_t key, uint8_t keycode);
  * @return None
  */
 void layout_unregister(uint8_t key, uint8_t keycode);
+
+/**
+ * @brief Remember the keycode associated with a physical key for later release
+ *
+ * Used when Combo flushes a buffered key into the normal layout path.
+ *
+ * @param key Key index
+ * @param keycode Keycode to associate
+ */
+void layout_set_active_keycode(uint8_t key, uint8_t keycode);

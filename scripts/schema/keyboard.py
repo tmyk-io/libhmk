@@ -38,6 +38,7 @@ class KeyboardKeyboard(BaseModel):
     # Maximum number of Dynamic Keystroke bindings per key. Higher values may require higher storage sizes.
     num_dynamic_keystroke_max_bindings: int = Field(ge=4, le=64, default=4)
     num_macro_nodes: int = Field(ge=1, le=255, default=128)
+    num_combos: int = Field(ge=1, le=32, default=16)
 
 
 # Hardware Configuration

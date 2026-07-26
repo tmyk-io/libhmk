@@ -16,6 +16,7 @@
 #include "commands.h"
 
 #include "advanced_keys.h"
+#include "combo.h"
 #include "hardware/hardware.h"
 #include "layout.h"
 #include "matrix.h"
@@ -103,6 +104,31 @@ static bool command_write_staged_macro(void) {
     layout_load_advanced_keys();
 
   return success;
+}
+
+/**
+ * @brief Write the combo staged in `staged_buffer`
+ *
+ * @return `true` if the write was successful
+ */
+static bool command_write_staged_combo(void) {
+  if (staged_buffer.staged_id != COMMAND_STAGED_COMBOS)
+    return false;
+
+  const uint8_t profile = staged_buffer.profile;
+  const uint8_t combo_index = staged_buffer.offset / sizeof(combo_t);
+
+  if (profile >= NUM_PROFILES || combo_index >= NUM_COMBOS)
+    return false;
+
+  // MVP: clear reserved flag bits (must_hold and others unimplemented).
+  staged_buffer.data.combo.flags = 0;
+
+  if (profile == eeconfig->current_profile)
+    combo_clear();
+
+  return EECONFIG_WRITE_N(profiles[profile].combos[combo_index],
+                          &staged_buffer.data.combo, sizeof(combo_t));
 }
 
 /**
@@ -408,6 +434,34 @@ static void command_process(void) {
         .field_size = sizeof(eeconfig->profiles[p->profile].macros),
         .item_size = sizeof(macro_node_t),
         .write_func = command_write_staged_macro,
+    });
+    break;
+  }
+  case COMMAND_GET_COMBOS: {
+    const command_in_staged_profile_t *p = &in->staged_profile;
+    const uint32_t combos_size = sizeof(eeconfig->profiles[p->profile].combos);
+
+    COMMAND_VERIFY(p->profile < NUM_PROFILES);
+    COMMAND_VERIFY(p->offset < combos_size);
+
+    out->staged_profile.len =
+        M_MIN(M_ARRAY_SIZE(out->staged_profile.data), combos_size - p->offset);
+    memcpy(out->staged_profile.data,
+           (const uint8_t *)eeconfig->profiles[p->profile].combos + p->offset,
+           out->staged_profile.len);
+    break;
+  }
+  case COMMAND_SET_COMBOS: {
+    const command_in_staged_profile_t *p = &in->staged_profile;
+
+    COMMAND_VERIFY(p->profile < NUM_PROFILES);
+
+    success = command_stage_write((command_staged_write_t){
+        .staged_id = COMMAND_STAGED_COMBOS,
+        .p = (command_in_staged_profile_t *)p,
+        .field_size = sizeof(eeconfig->profiles[p->profile].combos),
+        .item_size = sizeof(combo_t),
+        .write_func = command_write_staged_combo,
     });
     break;
   }

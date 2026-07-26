@@ -20,6 +20,7 @@ This repository contains libraries for building a Hall-effect keyboard firmware.
 - [x] **Dynamic Keystroke**: Assign up to 4 keycodes to a single key. Each keycode can be assigned up to 4 actions for 4 different parts of the keystroke.
 - [x] **Tap-Hold**: Send a different keycode depending on whether the key is tapped or held.
 - [x] **Toggle**: Toggle between key press and key release. Hold the key for normal behavior.
+- [x] **Combo**: Chord up to 4 keys within a per-combo term to emit another keycode (QMK-like). On failure, constituent keys are sent normally. Layer-scoped; keys with Advanced Keys on the same layer cannot be combo members. Configure via [hmkconf](https://github.com/tmyk-io/hmkconf) (firmware ≥ 0x0109).
 - [x] **N-Key Rollover**: Support for N-Key Rollover and automatically fall back to 6-Key Rollover in BIOS.
 - [x] **Automatic Calibration**: Automatically calibrate the analog input without requiring user intervention.
 - [x] **EEPROM Emulation**: No external EEPROM required. Emulate EEPROM using the internal flash memory.

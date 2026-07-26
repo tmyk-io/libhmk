@@ -31,6 +31,13 @@ static const macro_node_t default_macro = {
     .delay = 0,
     .next = MACRO_NODE_NONE,
 };
+static const combo_t default_combo = {
+    .layer = 0,
+    .keycode = KC_NO,
+    .term_ms = DEFAULT_COMBO_TERM_MS,
+    .keys = {COMBO_KEY_NONE, COMBO_KEY_NONE, COMBO_KEY_NONE, COMBO_KEY_NONE},
+    .flags = 0,
+};
 static eeconfig_profile_t default_profile = {
     .gamepad_options = DEFAULT_GAMEPAD_OPTIONS,
     .tick_rate = DEFAULT_TICK_RATE,
@@ -44,6 +51,8 @@ static bool eeconfig_write_default_profile(uint8_t profile) {
          sizeof(default_profile.keymap));
   for (uint32_t i = 0; i < NUM_MACRO_NODES; i++)
     default_profile.macros[i] = default_macro;
+  for (uint32_t i = 0; i < NUM_COMBOS; i++)
+    default_profile.combos[i] = default_combo;
   return EECONFIG_WRITE(profiles[profile], &default_profile);
 }
 
