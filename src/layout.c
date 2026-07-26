@@ -16,6 +16,7 @@
 #include "layout.h"
 
 #include "advanced_keys.h"
+#include "combo.h"
 #include "deferred_actions.h"
 #include "eeconfig.h"
 #include "hardware/hardware.h"
@@ -110,7 +111,10 @@ static uint8_t advanced_key_indices[NUM_LAYERS][NUM_KEYS];
 // Same as `active_keycodes` but for advanced keys
 static uint8_t active_advanced_keys[NUM_KEYS];
 
-void layout_init(void) { layout_load_advanced_keys(); }
+void layout_init(void) {
+  combo_init();
+  layout_load_advanced_keys();
+}
 
 void layout_load_advanced_keys(void) {
   advanced_key_init();
@@ -168,7 +172,10 @@ void layout_task(void) {
       const uint8_t keycode = layout_get_keycode(current_layer, i);
       const uint8_t ak_index = advanced_key_indices[current_layer][i];
 
-      if (ak_index) {
+      if (!ak_index && combo_wants_key(current_layer, i)) {
+        combo_on_press(current_layer, i, keycode);
+        has_non_tap_hold_press |= (keycode != KC_NO);
+      } else if (ak_index) {
         active_advanced_keys[i] = ak_index;
         ak_event = (advanced_key_event_t){
             .type = AK_EVENT_TYPE_PRESS,
@@ -187,21 +194,25 @@ void layout_task(void) {
       }
     } else if (!k->is_pressed & last_key_press) {
       // Key release event
-      const uint8_t keycode = active_keycodes[i];
-      const uint8_t ak_index = active_advanced_keys[i];
-
-      if (ak_index) {
-        active_advanced_keys[i] = 0;
-        ak_event = (advanced_key_event_t){
-            .type = AK_EVENT_TYPE_RELEASE,
-            .key = i,
-            .keycode = keycode,
-            .ak_index = ak_index - 1,
-        };
-        advanced_key_process(&ak_event);
+      if (combo_on_release(i)) {
+        // Combo module handled this release (pending buffer or active chord).
       } else {
-        active_keycodes[i] = KC_NO;
-        layout_unregister(i, keycode);
+        const uint8_t keycode = active_keycodes[i];
+        const uint8_t ak_index = active_advanced_keys[i];
+
+        if (ak_index) {
+          active_advanced_keys[i] = 0;
+          ak_event = (advanced_key_event_t){
+              .type = AK_EVENT_TYPE_RELEASE,
+              .key = i,
+              .keycode = keycode,
+              .ak_index = ak_index - 1,
+          };
+          advanced_key_process(&ak_event);
+        } else {
+          active_keycodes[i] = KC_NO;
+          layout_unregister(i, keycode);
+        }
       }
     } else if (k->is_pressed) {
       // Key hold event
@@ -231,6 +242,8 @@ void layout_task(void) {
     last_ak_tick = timer_read();
   }
 
+  combo_tick();
+
   if (should_send_reports) {
     hid_send_reports();
     should_send_reports = false;
@@ -255,12 +268,18 @@ static bool layout_set_profile(uint8_t profile) {
     return false;
 
   advanced_key_clear();
+  combo_clear();
   bool status = EECONFIG_WRITE(current_profile, &profile);
   if (status && profile != 0)
     status = EECONFIG_WRITE(last_non_default_profile, &profile);
   layout_load_advanced_keys();
 
   return status;
+}
+
+void layout_set_active_keycode(uint8_t key, uint8_t keycode) {
+  if (key < NUM_KEYS)
+    active_keycodes[key] = keycode;
 }
 
 void layout_register(uint8_t key, uint8_t keycode) {

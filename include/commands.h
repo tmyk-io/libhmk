@@ -55,6 +55,8 @@ typedef enum {
   COMMAND_SET_GAMEPAD_OPTIONS,
   COMMAND_GET_MACROS,
   COMMAND_SET_MACROS,
+  COMMAND_GET_COMBOS,
+  COMMAND_SET_COMBOS,
 
   COMMAND_UNKNOWN = 255,
 } command_id_t;
@@ -202,7 +204,8 @@ typedef struct __attribute__((packed)) {
     uint8_t gamepad_buttons[63];
     // For `COMMAND_GET_GAMEPAD_OPTIONS`
     gamepad_options_t gamepad_options;
-    // For `COMMAND_GET_ADVANCED_KEYS` and `COMMAND_GET_MACROS`
+    // For `COMMAND_GET_ADVANCED_KEYS`, `COMMAND_GET_MACROS`, and
+    // `COMMAND_GET_COMBOS`
     command_out_staged_profile_t staged_profile;
   };
 } command_out_buffer_t;
@@ -218,11 +221,13 @@ typedef enum {
   COMMAND_STAGED_NONE = 0,
   COMMAND_STAGED_ADVANCED_KEYS,
   COMMAND_STAGED_MACROS,
+  COMMAND_STAGED_COMBOS,
 } command_staged_id_t;
 
 typedef union {
   advanced_key_t advanced_key;
   macro_node_t macro_node;
+  combo_t combo;
 } command_staged_buffer_data_t;
 
 typedef struct {
