@@ -12,7 +12,7 @@ pio run                                  # build → .pio/build/<keyboard>/firmw
 pio run --target upload                  # flash (needs hardware + DFU); not available headless
 ```
 
-Valid `<keyboard>` values are directories under `keyboards/` (`he16`, `he60`, `he60-v2`, `m256-whe`).
+Valid `<keyboard>` values are directories under `keyboards/` (`he16`, `he35`, `he60`, `he60-v2`, `m256-whe`).
 
 If `pio` is missing from a non-interactive shell, ensure `~/.local/bin` is on `PATH` (user pip installs land there).
 
