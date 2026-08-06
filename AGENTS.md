@@ -53,3 +53,12 @@ There is no unit-test suite. In cloud/headless environments, a successful `pio r
 - [README.md](README.md) — features, build, porting, contribution branch
 - Per-keyboard notes: `keyboards/*/README.md`
 - Web configurator: [hmkconf](https://github.com/tmyk-io/hmkconf)
+
+## カスタム Cursor Skills（tmyk-io/cursor-skills）
+
+個人用スキル集 `tmyk-io/cursor-skills` を利用します。Cloud Agent の Build 時に `.cursor/install-skills.sh` が同リポジトリを clone し、スキルを `~/.cursor/skills` へ配置します。**Environment では `hmkconf` と `libhmk` の2つだけ選べばよく、`cursor-skills` を付ける必要はありません。**
+
+- 起動: `.cursor/environment.json` の `install` → `.cursor/install-skills.sh` → `cursor-skills` の `scripts/cloud-install.sh`（`~/.cursor/skills` へ rsync）
+- 収録スキル: `agents-md-creator` / `doc-updater` / `commit-push` / `dig` / `writing-plans`（各 `~/.cursor/skills/<name>/SKILL.md`）
+- **反映タイミング**: skills は Build 時点のスナップショットです。`cursor-skills` を更新したら、この Environment を **Rebuild** してください。一覧は次セッションから反映されます（同一セッション内では該当 `SKILL.md` を直接読めます）
+- スキルの追加・更新は `cursor-skills` 側で行い、そちらの `scripts/sync-from-local.sh` で同期します（このリポジトリにはスキル本体を置きません）
