@@ -1,3 +1,4 @@
 {
-  "install": "bash .cursor/install-skills.sh"
+  "install": "bash .cursor/install-skills.sh",
+  "repositoryDependencies": ["github.com/tmyk-io/cursor-skills"]
 }
